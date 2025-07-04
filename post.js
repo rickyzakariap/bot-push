@@ -52,7 +52,7 @@ async function main() {
   }
 
   // Selalu lakukan auto-push, meskipun tidak ada update
-  exec('git add log.txt && git commit -m "auto-update log.txt (force)" && git push', (err, stdout, stderr) => {
+  exec('git add log.txt && git commit -m "auto-update" && git push', (err, stdout, stderr) => {
     if (err) {
       console.error("Git error:", stderr);
     } else {

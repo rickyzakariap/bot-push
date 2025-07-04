@@ -3,7 +3,6 @@
     "@types/bun": "latest"
   },
   "dependencies": {
-    "discord.js": "^14.14.1",
     "dotenv": "^17.0.1",
     "express": "^4.18.2",
     "node-fetch": "^3.3.2"
