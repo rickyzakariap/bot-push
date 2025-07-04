@@ -43,4 +43,4 @@ async function fetchData() {
 
 ---
 
-Inspired by [@bot-push (hacktivity-bot)](https://github.com/dwisiswant0/hacktivity-bot) 
+Inspired by [@hacktivity-bot](https://github.com/dwisiswant0/hacktivity-bot) 
