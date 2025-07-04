@@ -1,37 +1,22 @@
 # Auto Push Discord Notifier
 
-This script automatically:
-- Fetches data from a free API (JSONPlaceholder by default)
-- Sends notifications to Discord via webhook
-- Stores sent data IDs in `log.txt`
-- Auto-commits and pushes `log.txt` to GitHub every run
+- Fetches random data, sends to Discord via webhook, logs sent IDs, and auto-pushes to GitHub.
 
-## How to Use
-
-1. **Clone the repo & install dependencies**
-   ```bash
-   git clone <repo-url>
-   cd <folder>
-   bun install
-   # or npm install if you use node-fetch (not required for Node.js v18+)
+## Usage
+1. Fill `.env` with your Discord webhook URL:
    ```
-
-2. **Create a `.env` file**
-   ```env
-   DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_id/your_webhook_token
+   DISCORD_WEBHOOK_URL=your_webhook_url
    ```
-
-3. **Run the script**
-   ```bash
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Run:
+   ```
    node post.js
-   # or bun run post.js
    ```
 
-4. **Check Discord**
-   - Notifications will appear in the Discord channel linked to your webhook.
-
-5. **Check GitHub**
-   - Every time `log.txt` is updated, the script will auto-commit & push to your GitHub repo.
+- Every run: sends random entries to Discord, logs IDs, and pushes to GitHub.
 
 ## Customization
 - To change the data source, edit the `fetchData()` function in `post.js`.
