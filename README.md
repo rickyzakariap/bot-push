@@ -1,13 +1,10 @@
 # Auto Push Discord Notifier
 
-- Fetches random data, sends to Discord via webhook, logs sent IDs, and auto-pushes to GitHub.
-
-## Usage
-1. Fill `.env` with your Discord webhook URL:
+1. Set `.env`:
    ```
    DISCORD_WEBHOOK_URL=your_webhook_url
    ```
-2. Install dependencies:
+2. Install:
    ```
    npm install
    ```
