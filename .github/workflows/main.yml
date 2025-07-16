@@ -22,9 +22,9 @@ jobs:
         run: npm install
 
       - name: Run RSS to Discord script
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.https://discord.com/api/webhooks/1390610523581841488/4ug1f8hsmetljyFyqGT-vnHTxxi7q8itwy4g4hQXy7BogBwOl2WaoSU6rkaQF_wLSkMY }}
-          RSS_URL: ${{ secrets.https://www.antaranews.com/rss/dunia.xml }}
+     env:
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  RSS_URL: ${{ secrets.RSS_URL }}
         run: node rss-to-discord.js
 
       - name: Commit and push log updates
