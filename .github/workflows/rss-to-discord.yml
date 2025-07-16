@@ -5,7 +5,7 @@ on:
     - cron: '0 7 * * *'   # Runs every day at 07:00 UTC
   workflow_dispatch:       # Allows manual run from GitHub UI
 
-  permissions:
+permissions:
   contents: write
 
 jobs:
