@@ -37,37 +37,33 @@ async function fetchData(url) {
 }
 
 async function main() {
-  let foundArticle = null;
-  let foundFeedUrl = null;
-
+  let postsMade = 0;
   for (const url of rssFeeds) {
     const data = await fetchData(url);
     if (data.length > 0) {
-      foundArticle = data[0];
-      foundFeedUrl = url;
-      break; // Only send one article per run, from the first feed with news
+      const article = data[0];
+      lastNumber++;
+      const numberStr = String(lastNumber).padStart(3, '0');
+      const payload = {
+        content: `**[${numberStr}] ${article.title}**\n${article.url}\n(Source: ${url})`
+      };
+      const res = await fetch(DISCORD_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        console.log(`${numberStr} OK for feed: ${url}`);
+        fs.appendFileSync("log.txt", numberStr + "\n");
+        fs.writeFileSync(numberFile, String(lastNumber));
+        postsMade++;
+      } else {
+        console.log(`Failed to send ${numberStr} for feed: ${url}`);
+      }
     }
   }
 
-  if (foundArticle) {
-    lastNumber++;
-    const numberStr = String(lastNumber).padStart(3, '0');
-    const payload = {
-      content: `**[${numberStr}] ${foundArticle.title}**\n${foundArticle.url}\n(Source: ${foundFeedUrl})`
-    };
-    const res = await fetch(DISCORD_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) {
-      console.log(`${numberStr} OK`);
-      fs.appendFileSync("log.txt", numberStr + "\n");
-      fs.writeFileSync(numberFile, String(lastNumber));
-    } else {
-      console.log(`Failed to send ${numberStr}`);
-    }
-  } else {
+  if (postsMade === 0) {
     console.log("No new articles to send from any feed.");
   }
 
