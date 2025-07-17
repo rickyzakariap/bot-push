@@ -4,7 +4,6 @@ const { exec } = require("child_process");
 const Parser = require('rss-parser');
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-const RSS_URL = process.env.RSS_URL || 'http://feeds.bbci.co.uk/news/rss.xml'; // Default: BBC News
 
 // Always clear log.txt before each run
 fs.writeFileSync("log.txt", "");
@@ -16,36 +15,51 @@ if (fs.existsSync(numberFile)) {
   lastNumber = parseInt(fs.readFileSync(numberFile, "utf-8"), 10) || 0;
 }
 
-async function fetchData() {
+// Read all RSS URLs from rss-feeds.txt
+const rssFeeds = fs.readFileSync('rss-feeds.txt', 'utf-8')
+  .split('\n')
+  .map(line => line.trim())
+  .filter(line => line && !line.startsWith('#'));
+
+async function fetchData(url) {
   const parser = new Parser();
-  const feed = await parser.parseURL(RSS_URL);
-  return feed.items.map(item => ({
-    id: item.link,
-    title: item.title,
-    url: item.link
-  }));
+  try {
+    const feed = await parser.parseURL(url);
+    return feed.items.map(item => ({
+      id: item.link,
+      title: item.title,
+      url: item.link
+    }));
+  } catch (e) {
+    console.error(`Failed to fetch or parse feed: ${url}`);
+    return [];
+  }
 }
 
 async function main() {
-  const data = await fetchData();
+  let foundArticle = null;
+  let foundFeedUrl = null;
 
-  // Only send one article per run
-  const newArticle = data[0];
-  if (newArticle) {
-    // Increment the number
+  for (const url of rssFeeds) {
+    const data = await fetchData(url);
+    if (data.length > 0) {
+      foundArticle = data[0];
+      foundFeedUrl = url;
+      break; // Only send one article per run, from the first feed with news
+    }
+  }
+
+  if (foundArticle) {
     lastNumber++;
     const numberStr = String(lastNumber).padStart(3, '0');
-
-    // Send to Discord
     const payload = {
-      content: `**[${numberStr}] ${newArticle.title}**\n${newArticle.url}`
+      content: `**[${numberStr}] ${foundArticle.title}**\n${foundArticle.url}\n(Source: ${foundFeedUrl})`
     };
     const res = await fetch(DISCORD_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-
     if (res.ok) {
       console.log(`${numberStr} OK`);
       fs.appendFileSync("log.txt", numberStr + "\n");
@@ -54,7 +68,7 @@ async function main() {
       console.log(`Failed to send ${numberStr}`);
     }
   } else {
-    console.log("No new articles to send.");
+    console.log("No new articles to send from any feed.");
   }
 
   // Always auto-push
