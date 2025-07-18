@@ -1,43 +1,45 @@
-# Auto Push Discord Notifier
+# RSS to Discord Auto Poster
 
-1. Set `.env`:
-   ```
-   DISCORD_WEBHOOK_URL=your_webhook_url
-   ```
-2. Install:
+This project automatically fetches news from multiple RSS feeds and posts them to a Discord channel using a webhook. It is designed to run daily via GitHub Actions and limits the number of articles sent per day.
+
+## Quick Setup
+
+1. **Environment Variables**
+   - Create a `.env` file with your Discord webhook:
+     ```
+     DISCORD_WEBHOOK_URL=your_discord_webhook_url
+     ```
+
+2. **RSS Feeds**
+   - Add your RSS feed URLs to `rss-feeds.txt`, one per line.
+
+3. **Install Dependencies**
    ```
    npm install
    ```
-3. Run:
+
+4. **Manual Run**
    ```
-   node post.js
+   node rss-to-discord.js
    ```
 
-- Every run: sends random entries to Discord, logs IDs, and pushes to GitHub.
+## GitHub Actions Automation
+- The workflow runs automatically on a schedule (see `.github/workflows/rss-to-discord.yml`).
+- **Daily Limit:** Only 10 articles are sent per day. The count resets every day.
+- **Log Rotation:** When `log.txt` reaches 50 lines, it is cleared and numbering restarts from 1.
+- **Commit Author:** Commits are made using your GitHub username and email (requires a Personal Access Token).
 
-## Customization
-- To change the data source, edit the `fetchData()` function in `post.js`.
-- To change the Discord message format, edit the payload section in `post.js`.
-- **Random IDs and random count:**
-  - You can modify `fetchData()` to generate random IDs and a random number of entries each day. See below for an example.
+### Setup Personal Access Token (PAT)
+1. Create a PAT with `repo` scope at [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens).
+2. Add the token to your repository secrets as `GH_PAT`.
 
-## Example: Random IDs and Random Count
-Replace `fetchData()` with:
-```js
-async function fetchData() {
-  const count = Math.floor(Math.random() * 10) + 1; // 1-10 random entries
-  return Array.from({ length: count }, (_, i) => ({
-    id: Math.random().toString(36).slice(2, 10) + Date.now(),
-    title: `Random Entry #${i + 1}`,
-    url: `https://example.com/random/${i + 1}`
-  }));
-}
-```
-
-## Notes
-- Make sure your git remote and credentials are set up so auto-push works smoothly.
-- `log.txt` is ignored by `.gitignore` (edit if you want it to appear in the repo).
+## Files
+- `rss-to-discord.js` — Main script
+- `rss-feeds.txt` — List of RSS feed URLs
+- `log.txt` — Log of sent articles
+- `log_number.txt` — Last article number
+- `daily_count.txt` — Daily sent counter
 
 ---
 
-Inspired by [@hacktivity-bot](https://github.com/dwisiswant0/hacktivity-bot) 👏
+Inspired by [@hacktivity-bot](https://github.com/dwisiswant0/hacktivity-bot)
