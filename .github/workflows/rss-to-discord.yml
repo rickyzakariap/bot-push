@@ -39,13 +39,15 @@ jobs:
       - name: Show git diff
         run: git diff
 
-      - name: Pull latest changes
-        run: git pull origin main --rebase
-
-      - name: Commit and push log updates
+      - name: Commit log updates
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add log.txt log_number.txt
           git commit -m "auto-update log.txt (numbered)" || echo "No changes to commit"
-          git push 
+
+      - name: Pull latest changes
+        run: git pull origin main --rebase
+
+      - name: Push log updates
+        run: git push 

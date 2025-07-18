@@ -5,14 +5,28 @@ const Parser = require('rss-parser');
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
-// Always clear log.txt before each run
-fs.writeFileSync("log.txt", "");
-
-// Read the last number from a separate file (or start from 0)
-let lastNumber = 0;
 const numberFile = "log_number.txt";
-if (fs.existsSync(numberFile)) {
-  lastNumber = parseInt(fs.readFileSync(numberFile, "utf-8"), 10) || 0;
+let lastNumber = 0;
+
+// Cek jumlah baris log.txt, jika >= 50, reset log dan nomor
+let logLines = [];
+if (fs.existsSync("log.txt")) {
+  logLines = fs.readFileSync("log.txt", "utf-8").split("\n").filter(Boolean);
+  if (logLines.length >= 50) {
+    fs.writeFileSync("log.txt", "");
+    fs.writeFileSync(numberFile, "1");
+    lastNumber = 1;
+  } else {
+    // Baca nomor terakhir
+    if (fs.existsSync(numberFile)) {
+      lastNumber = parseInt(fs.readFileSync(numberFile, "utf-8"), 10) || 0;
+    }
+  }
+} else {
+  fs.writeFileSync("log.txt", "");
+  if (fs.existsSync(numberFile)) {
+    lastNumber = parseInt(fs.readFileSync(numberFile, "utf-8"), 10) || 0;
+  }
 }
 
 // Read all RSS URLs from rss-feeds.txt
