@@ -17,7 +17,6 @@ if (fs.existsSync("log.txt")) {
     fs.writeFileSync(numberFile, "1");
     lastNumber = 1;
   } else {
-    // Baca nomor terakhir
     if (fs.existsSync(numberFile)) {
       lastNumber = parseInt(fs.readFileSync(numberFile, "utf-8"), 10) || 0;
     }
@@ -28,6 +27,27 @@ if (fs.existsSync("log.txt")) {
     lastNumber = parseInt(fs.readFileSync(numberFile, "utf-8"), 10) || 0;
   }
 }
+
+// === BATAS MAKSIMAL ARTIKEL PER HARI ===
+const dailyCountFile = "daily_count.txt";
+const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+let dailyCount = 0;
+let lastDate = today;
+if (fs.existsSync(dailyCountFile)) {
+  const [savedDate, savedCount] = fs.readFileSync(dailyCountFile, "utf-8").split(",");
+  if (savedDate === today) {
+    dailyCount = parseInt(savedCount, 10) || 0;
+  } else {
+    dailyCount = 0;
+  }
+}
+
+const MAX_DAILY = 10;
+if (dailyCount >= MAX_DAILY) {
+  console.log(`Sudah ${MAX_DAILY} artikel terkirim hari ini, skip kirim artikel.`);
+  process.exit(0);
+}
+// === END BATAS MAKSIMAL ===
 
 // Read all RSS URLs from rss-feeds.txt
 const rssFeeds = fs.readFileSync('rss-feeds.txt', 'utf-8')
@@ -82,6 +102,9 @@ async function main() {
       console.log(`${numberStr} OK`);
       fs.appendFileSync("log.txt", numberStr + "\n");
       fs.writeFileSync(numberFile, String(lastNumber));
+      // Update daily count
+      dailyCount++;
+      fs.writeFileSync(dailyCountFile, `${today},${dailyCount}`);
     } else {
       console.log(`Failed to send ${numberStr}`);
     }
@@ -90,7 +113,7 @@ async function main() {
   }
 
   // Always auto-push
-  exec('git add log.txt log_number.txt && git commit -m "auto-update log.txt (numbered)" && git push', (err, stdout, stderr) => {
+  exec('git add log.txt log_number.txt daily_count.txt && git commit -m "auto-update log.txt (numbered)" && git push', (err, stdout, stderr) => {
     if (err) {
       console.error("Git error:", stderr);
     } else {
