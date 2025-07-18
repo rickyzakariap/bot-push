@@ -39,6 +39,9 @@ jobs:
       - name: Show git diff
         run: git diff
 
+      - name: Pull latest changes
+        run: git pull origin main --rebase
+
       - name: Commit and push log updates
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
