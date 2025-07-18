@@ -48,6 +48,11 @@ async function main() {
     }
   }
 
+  // Tambahkan timestamp ke log.txt agar selalu ada perubahan
+  const now = new Date();
+  const timestamp = now.toISOString();
+  fs.appendFileSync("log.txt", `Run at: ${timestamp}\n`);
+
   if (foundArticle) {
     lastNumber++;
     const numberStr = String(lastNumber).padStart(3, '0');
