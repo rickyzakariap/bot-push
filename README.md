@@ -40,6 +40,8 @@ This project automatically fetches news from multiple RSS feeds and posts them t
 - `log_number.txt` — Last article number
 - `daily_count.txt` — Daily sent counter
 
+[![wakatime](https://wakatime.com/badge/github/rickyzakariap/bot-push.svg)](https://wakatime.com/badge/github/rickyzakariap/bot-push)
+
 ---
 
 Inspired by [@hacktivity-bot](https://github.com/dwisiswant0/hacktivity-bot)
