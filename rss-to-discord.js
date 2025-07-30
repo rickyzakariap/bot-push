@@ -42,7 +42,7 @@ if (fs.existsSync(dailyCountFile)) {
   }
 }
 
-const MAX_DAILY = 10;
+const MAX_DAILY = 1;
 if (dailyCount >= MAX_DAILY) {
   console.log(`Sudah ${MAX_DAILY} artikel terkirim hari ini, skip kirim artikel.`);
   process.exit(0);
