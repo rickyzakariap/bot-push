@@ -42,4 +42,6 @@ This project automatically fetches news from multiple RSS feeds and posts them t
 
 ---
 
-Inspired by [@hacktivity-bot](https://github.com/dwisiswant0/hacktivity-bot)
+Inspired by [@hacktivity-bot](https://github.com/dwisiswant0/hacktivity-bot) 
+
+[![wakatime](https://wakatime.com/badge/github/rickyzakariap/bot-push.svg)](https://wakatime.com/badge/github/rickyzakariap/bot-push)
