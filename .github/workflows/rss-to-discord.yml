@@ -2,7 +2,7 @@ name: RSS to Discord Auto Post
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # Runs every 7 AM
+    - cron: '0 8 * * *'   # Runs every day at 8:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -24,11 +24,28 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run RSS to Discord script
+      - name: Determine post count and run bot
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           RSS_URL: ${{ secrets.RSS_URL }}
-        run: node rss-to-discord.js
+        run: |
+          DAY=$(date +%u)
+          if [ "$DAY" -ge 6 ]; then
+            # Weekend: Saturday (6) or Sunday (7)
+            MIN=5
+            MAX=8
+          else
+            # Weekday: Monday (1) to Friday (5)
+            MIN=1
+            MAX=4
+          fi
+          COUNT=$(( RANDOM % (MAX - MIN + 1) + MIN ))
+          echo "Posting $COUNT times today"
+          for i in $(seq 1 $COUNT); do
+            echo "Run #$i"
+            node rss-to-discord.js
+            sleep 10 # Optional: wait 10 seconds between runs
+          done
 
       - name: Show log.txt content
         run: cat log.txt
