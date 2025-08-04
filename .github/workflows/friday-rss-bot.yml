@@ -1,15 +1,15 @@
-name: RSS to Discord Auto Post
+name: Friday RSS to Discord Bot
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # Runs every day at 8:00 UTC
+    - cron: '0 16-18 * * 5'   # Runs every hour from 4-6 PM on Fridays only
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  rss-to-discord:
+  friday-rss-bot:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,27 +24,35 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Determine post count and run bot
+      - name: Friday random posting (4-6 PM)
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           RSS_URL: ${{ secrets.RSS_URL }}
         run: |
+          # Check if it's Friday
           DAY=$(date +%u)
-          if [ "$DAY" -ge 6 ]; then
-            # Weekend: Saturday (6) or Sunday (7)
-            MIN=5
-            MAX=8
-          else
-            # Weekday: Monday (1) to Friday (5)
-            MIN=1
-            MAX=4
+          if [ "$DAY" != "5" ]; then
+            echo "Not Friday, skipping..."
+            exit 0
           fi
+          
+          # Check if it's between 4-6 PM
+          HOUR=$(date +%H)
+          if [ "$HOUR" -lt 16 ] || [ "$HOUR" -gt 18 ]; then
+            echo "Not between 4-6 PM, skipping..."
+            exit 0
+          fi
+          
+          # Random posts between 1-10
+          MIN=1
+          MAX=10
           COUNT=$(( RANDOM % (MAX - MIN + 1) + MIN ))
-          echo "Posting $COUNT times today"
+          echo "Friday 4-6 PM: Posting $COUNT times"
+          
           for i in $(seq 1 $COUNT); do
-            echo "Run #$i"
+            echo "Friday Run #$i"
             node rss-to-discord.js
-            sleep 10 # Optional: wait 10 seconds between runs
+            sleep 15 # Wait 15 seconds between runs
           done
 
       - name: Show log.txt content
@@ -61,7 +69,7 @@ jobs:
           git config --global user.email "ricky.zakariap@gmail.com"
           git config --global user.name "rickyzakariap"
           git add -A
-          git commit -m "auto-update log.txt (numbered)" || echo "No changes to commit"
+          git commit -m "Friday auto-update log.txt (numbered)" || echo "No changes to commit"
 
       - name: Pull latest changes
         env:
