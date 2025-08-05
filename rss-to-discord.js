@@ -105,9 +105,11 @@ async function main() {
       console.log(`${numberStr} OK`);
       fs.appendFileSync("log.txt", numberStr + "\n");
       fs.writeFileSync(numberFile, String(lastNumber));
-      // Update daily count
-      dailyCount++;
-      fs.writeFileSync(dailyCountFile, `${today},${dailyCount}`);
+      
+      // Update daily count --
+      // dailyCount++;
+      // fs.writeFileSync(dailyCountFile, `${today},${dailyCount}`);
+
     } else {
       console.log(`Failed to send ${numberStr}`);
     }
