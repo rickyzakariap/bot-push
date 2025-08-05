@@ -29,6 +29,8 @@ if (fs.existsSync("log.txt")) {
 }
 
 // === BATAS MAKSIMAL ARTIKEL PER HARI ===
+// Batas harian sudah diatur di file workflow .yml, jadi bagian ini tidak diperlukan lagi.
+/*
 const dailyCountFile = "daily_count.txt";
 const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 let dailyCount = 0;
@@ -47,6 +49,7 @@ if (dailyCount >= MAX_DAILY) {
   console.log(`Sudah ${MAX_DAILY} artikel terkirim hari ini, skip kirim artikel.`);
   process.exit(0);
 }
+*/
 // === END BATAS MAKSIMAL ===
 
 // Read all RSS URLs from rss-feeds.txt
