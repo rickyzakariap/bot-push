@@ -59,8 +59,8 @@ jobs:
             if ! git diff-index --quiet HEAD; then
               echo "Changes detected. Committing and pushing..."
               git add -A
-              git commit -m "Auto-post #${i} of ${COUNT}"
-              git pull origin main --rebase # Pull before pushing to avoid conflicts
+              git commit -m "Auto-post #${i} of ${COUNT}" || true # <-- TAMBAHKAN '|| true' DI SINI
+              git pull origin main --rebase
               git push
             else
               echo "No file changes detected, skipping commit."
