@@ -74,15 +74,16 @@ async function fetchData(url) {
 }
 
 async function main() {
+  // 1. Pilih satu URL feed secara acak dari daftar
+  const randomFeedUrl = rssFeeds[Math.floor(Math.random() * rssFeeds.length)];
+  console.log(`Fetching from random feed: ${randomFeedUrl}`);
+
+  // 2. Ambil data dari feed yang dipilih secara acak
+  const data = await fetchData(randomFeedUrl);
   let foundArticle = null;
-  let foundFeedUrl = null;
-  for (const url of rssFeeds) {
-    const data = await fetchData(url);
-    if (data.length > 0) {
-      foundArticle = data[0];
-      foundFeedUrl = url;
-      break; // Hanya kirim satu artikel dari feed pertama yang ada beritanya
-    }
+
+  if (data.length > 0) {
+    foundArticle = data[0]; // Ambil artikel teratas dari feed tersebut
   }
 
   // Tambahkan timestamp ke log.txt agar selalu ada perubahan
@@ -94,7 +95,7 @@ async function main() {
     lastNumber++;
     const numberStr = String(lastNumber).padStart(3, '0');
     const payload = {
-      content: `**[${numberStr}] ${foundArticle.title}**\n${foundArticle.url}\n(Source: ${foundFeedUrl})`
+      content: `**[${numberStr}] ${foundArticle.title}**\n${foundArticle.url}\n(Source: ${randomFeedUrl})` // Gunakan URL acak sebagai sumber
     };
     const res = await fetch(DISCORD_WEBHOOK_URL, {
       method: "POST",
@@ -105,28 +106,12 @@ async function main() {
       console.log(`${numberStr} OK`);
       fs.appendFileSync("log.txt", numberStr + "\n");
       fs.writeFileSync(numberFile, String(lastNumber));
-      
-      // Update daily count --
-      // dailyCount++;
-      // fs.writeFileSync(dailyCountFile, `${today},${dailyCount}`);
-
     } else {
       console.log(`Failed to send ${numberStr}`);
     }
   } else {
-    console.log("No new articles to send from any feed.");
+    console.log(`No new articles to send from the selected feed: ${randomFeedUrl}`);
   }
 
-  // Always auto-push
-  /*
-  exec('git add log.txt log_number.txt daily_count.txt && git commit -m "auto-update log.txt (numbered)" && git push', (err, stdout, stderr) => {
-    if (err) {
-      console.error("Git error:", stderr);
-    } else {
-      console.log("Git push success:", stdout);
-    }
-  });
-  */
+  // Bagian "Always auto-push" (git push) sudah ditangani oleh file workflow .yml
 }
-
-main();
