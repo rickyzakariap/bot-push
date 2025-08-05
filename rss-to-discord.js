@@ -113,6 +113,7 @@ async function main() {
   }
 
   // Always auto-push
+  /*
   exec('git add log.txt log_number.txt daily_count.txt && git commit -m "auto-update log.txt (numbered)" && git push', (err, stdout, stderr) => {
     if (err) {
       console.error("Git error:", stderr);
@@ -120,6 +121,7 @@ async function main() {
       console.log("Git push success:", stdout);
     }
   });
+  */
 }
 
-main(); 
+main();
