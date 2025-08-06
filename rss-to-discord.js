@@ -30,7 +30,6 @@ if (fs.existsSync("log.txt")) {
 
 // === BATAS MAKSIMAL ARTIKEL PER HARI ===
 // Batas harian sudah diatur di file workflow .yml, jadi bagian ini tidak diperlukan lagi.
-*
 const dailyCountFile = "daily_count.txt";
 const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 let dailyCount = 0;
