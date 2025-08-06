@@ -29,6 +29,7 @@ if (fs.existsSync("log.txt")) {
 }
 
 // === BATAS MAKSIMAL ARTIKEL PER HARI ===
+// Batas harian sudah diatur di file workflow .yml, jadi bagian ini tidak diperlukan lagi.
 const dailyCountFile = "daily_count.txt";
 const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 let dailyCount = 0;
@@ -90,6 +91,7 @@ function getRandomUnpostedArticle(articles, postedIds) {
 }
 
 async function main() {
+<<<<<<< HEAD
   console.log("Fetching all articles from RSS feeds...");
   const allArticles = await fetchAllArticles();
   console.log(`Total articles fetched: ${allArticles.length}`);
@@ -126,6 +128,44 @@ async function main() {
       console.log("Git push success:", stdout);
     }
   });
-}
+=======
+  // 1. Pilih satu URL feed secara acak dari daftar
+  const randomFeedUrl = rssFeeds[Math.floor(Math.random() * rssFeeds.length)];
+  console.log(`Fetching from random feed: ${randomFeedUrl}`);
 
-main(); 
+  // 2. Ambil data dari feed yang dipilih secara acak
+  const data = await fetchData(randomFeedUrl);
+  let foundArticle = null;
+
+  if (data.length > 0) {
+    foundArticle = data[0]; // Ambil artikel teratas dari feed tersebut
+  }
+
+  // Tambahkan timestamp ke log.txt agar selalu ada perubahan
+  const now = new Date();
+  const timestamp = now.toISOString();
+  fs.appendFileSync("log.txt", `Run at: ${timestamp}\n`);
+
+  if (foundArticle) {
+    lastNumber++;
+    const numberStr = String(lastNumber).padStart(3, '0');
+    const payload = {
+      content: `**[${numberStr}] ${foundArticle.title}**\n${foundArticle.url}\n(Source: ${randomFeedUrl})` // Gunakan URL acak sebagai sumber
+    };
+    const res = await fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      console.log(`${numberStr} OK`);
+      fs.appendFileSync("log.txt", numberStr + "\n");
+      fs.writeFileSync(numberFile, String(lastNumber));
+    } else {
+      console.log(`Failed to send ${numberStr}`);
+    }
+  } else {
+    console.log(`No new articles to send from the selected feed: ${randomFeedUrl}`);
+  }
+>>>>>>> 460a3a90ab5420901ec4f115b620e4778a724db6
+}
