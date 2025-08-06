@@ -120,7 +120,7 @@ async function main() {
   }
 
   // Always auto-push
-  exec('git add log.txt daily_count.txt && git commit -m "auto-update log.txt (random RSS)" && git push', (err, stdout, stderr) => {
+  exec('git add log.txt daily_count.txt && git commit -m "auto-update log.txt (your RSS here everyday!)" && git push', (err, stdout, stderr) => {
     if (err) {
       console.error("Git error:", stderr);
     } else {
