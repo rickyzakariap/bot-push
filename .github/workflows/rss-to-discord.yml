@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          # We need to fetch all history for git pull to work correctly
+          fetch-depth: 0 
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -24,55 +27,44 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Determine post count and run bot
+      - name: Run bot, commit, and push in a loop
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           RSS_URL: ${{ secrets.RSS_URL }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
+          # 1. Determine random post count
           DAY=$(date +%u)
           if [ "$DAY" -ge 6 ]; then
-            # Weekend: Saturday (6) or Sunday (7)
             MIN=5
             MAX=8
           else
-            # Weekday: Monday (1) to Friday (5)
             MIN=1
             MAX=4
           fi
           COUNT=$(( RANDOM % (MAX - MIN + 1) + MIN ))
-          echo "Posting $COUNT times today"
-          for i in $(seq 1 $COUNT); do
-            echo "Run #$i"
-            node rss-to-discord.js
-            sleep 10 # Optional: wait 10 seconds between runs
-          done
+          echo "Will post and commit $COUNT times today."
 
-      - name: Show log.txt content
-        run: cat log.txt
-
-      - name: Show git status
-        run: git status
-
-      - name: Show git diff
-        run: git diff
-
-      - name: Commit log updates
-        run: |
+          # 2. Configure Git User
           git config --global user.email "ricky.zakariap@gmail.com"
           git config --global user.name "rickyzakariap"
-          git add -A
-          git commit -m "auto-update log.txt (numbered)" || echo "No changes to commit"
-
-      - name: Pull latest changes
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
           git remote set-url origin https://$GH_PAT@github.com/rickyzakariap/bot-push.git
-          git pull origin main --rebase
 
-      - name: Push log updates
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          git remote set-url origin https://$GH_PAT@github.com/rickyzakariap/bot-push.git
-          git push 
+          # 3. Loop for posting and committing
+          for i in $(seq 1 $COUNT); do
+            echo "--- Run #$i of $COUNT ---"
+            node rss-to-discord.js
+            
+            # Check if there are any file changes
+            if ! git diff-index --quiet HEAD; then
+              echo "Changes detected. Committing and pushing..."
+              git add -A
+              git commit -m "Auto-post #${i} of ${COUNT}" || true # <-- TAMBAHKAN '|| true' DI SINI
+              git pull origin main --rebase
+              git push
+            else
+              echo "No file changes detected, skipping commit."
+            fi
+            
+            sleep 10 # Wait 10 seconds between runs
+          done

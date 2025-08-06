@@ -66,8 +66,8 @@ jobs:
 
       - name: Commit log updates
         run: |
-          git config --global user.email "ricky.zakariap@gmail.com"
-          git config --global user.name "rickyzakariap"
+          git config --global user.email "jzhxr@users.noreply.github.com"
+          git config --global user.name "jzhxr"
           git add -A
           git commit -m "Friday auto-update log.txt (numbered)" || echo "No changes to commit"
 
@@ -75,12 +75,12 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git remote set-url origin https://$GH_PAT@github.com/rickyzakariap/bot-push.git
+          git remote set-url origin https://$GH_PAT@github.com/jzhxr/bot-push-jz.git
           git pull origin main --rebase
 
       - name: Push log updates
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git remote set-url origin https://$GH_PAT@github.com/rickyzakariap/bot-push.git
+          git remote set-url origin https://$GH_PAT@github.com/jzhxr/bot-push-jz.git
           git push 

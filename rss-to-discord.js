@@ -32,7 +32,6 @@ if (fs.existsSync("log.txt")) {
 const dailyCountFile = "daily_count.txt";
 const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 let dailyCount = 0;
-let lastDate = today;
 if (fs.existsSync(dailyCountFile)) {
   const [savedDate, savedCount] = fs.readFileSync(dailyCountFile, "utf-8").split(",");
   if (savedDate === today) {
@@ -42,7 +41,7 @@ if (fs.existsSync(dailyCountFile)) {
   }
 }
 
-const MAX_DAILY = 1;
+const MAX_DAILY = 3; // Increase for more posts per day
 if (dailyCount >= MAX_DAILY) {
   console.log(`Sudah ${MAX_DAILY} artikel terkirim hari ini, skip kirim artikel.`);
   process.exit(0);
@@ -55,65 +54,72 @@ const rssFeeds = fs.readFileSync('rss-feeds.txt', 'utf-8')
   .map(line => line.trim())
   .filter(line => line && !line.startsWith('#'));
 
-async function fetchData(url) {
+// Read posted article IDs from log.txt
+let postedIds = [];
+if (fs.existsSync("log.txt")) {
+  postedIds = fs.readFileSync("log.txt", "utf-8").split("\n").filter(Boolean);
+}
+
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+async function fetchAllArticles() {
   const parser = new Parser();
-  try {
-    const feed = await parser.parseURL(url);
-    return feed.items.map(item => ({
-      id: item.link,
-      title: item.title,
-      url: item.link
-    }));
-  } catch (e) {
-    console.error(`Failed to fetch or parse feed: ${url}`);
-    return [];
+  let allArticles = [];
+  for (const url of rssFeeds) {
+    try {
+      const feed = await parser.parseURL(url);
+      const articles = feed.items.map(item => ({
+        id: item.link,
+        title: item.title,
+        url: item.link,
+        feedUrl: url
+      }));
+      allArticles = allArticles.concat(articles);
+    } catch (e) {
+      console.error(`Failed to fetch or parse feed: ${url}`);
+    }
   }
+  return allArticles;
+}
+
+function getRandomUnpostedArticle(articles, postedIds) {
+  const unposted = articles.filter(a => !postedIds.includes(a.id));
+  if (unposted.length === 0) return null;
+  const idx = Math.floor(Math.random() * unposted.length);
+  return unposted[idx];
 }
 
 async function main() {
-  let foundArticle = null;
-  let foundFeedUrl = null;
-  for (const url of rssFeeds) {
-    const data = await fetchData(url);
-    if (data.length > 0) {
-      foundArticle = data[0];
-      foundFeedUrl = url;
-      break; // Hanya kirim satu artikel dari feed pertama yang ada beritanya
-    }
+  console.log("Fetching all articles from RSS feeds...");
+  const allArticles = await fetchAllArticles();
+  console.log(`Total articles fetched: ${allArticles.length}`);
+  const article = getRandomUnpostedArticle(allArticles, postedIds);
+  if (!article) {
+    console.log("No new articles to send from any feed.");
+    return;
   }
 
-  // Tambahkan timestamp ke log.txt agar selalu ada perubahan
-  const now = new Date();
-  const timestamp = now.toISOString();
-  fs.appendFileSync("log.txt", `Run at: ${timestamp}\n`);
-
-  if (foundArticle) {
-    lastNumber++;
-    const numberStr = String(lastNumber).padStart(3, '0');
-    const payload = {
-      content: `**[${numberStr}] ${foundArticle.title}**\n${foundArticle.url}\n(Source: ${foundFeedUrl})`
-    };
-    const res = await fetch(DISCORD_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) {
-      console.log(`${numberStr} OK`);
-      fs.appendFileSync("log.txt", numberStr + "\n");
-      fs.writeFileSync(numberFile, String(lastNumber));
-      // Update daily count
-      dailyCount++;
-      fs.writeFileSync(dailyCountFile, `${today},${dailyCount}`);
-    } else {
-      console.log(`Failed to send ${numberStr}`);
-    }
+  // Post to Discord
+  const payload = {
+    content: `**${article.title}**\n${article.url}\n(Source: ${article.feedUrl})`
+  };
+  const res = await fetch(DISCORD_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    console.log(`Posted: ${article.id}`);
+    fs.appendFileSync("log.txt", article.id + "\n");
+    // Update daily count
+    dailyCount++;
+    fs.writeFileSync(dailyCountFile, `${today},${dailyCount}`);
   } else {
-    console.log("No new articles to send from any feed.");
+    console.log(`Failed to send ${article.id}`);
   }
 
   // Always auto-push
-  exec('git add log.txt log_number.txt daily_count.txt && git commit -m "auto-update log.txt (numbered)" && git push', (err, stdout, stderr) => {
+  exec('git add log.txt daily_count.txt && git commit -m "auto-update log.txt (random RSS)" && git push', (err, stdout, stderr) => {
     if (err) {
       console.error("Git error:", stderr);
     } else {
