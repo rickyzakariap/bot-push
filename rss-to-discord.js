@@ -48,7 +48,6 @@ if (dailyCount >= MAX_DAILY) {
   console.log(`Sudah ${MAX_DAILY} artikel terkirim hari ini, skip kirim artikel.`);
   process.exit(0);
 }
-*/
 // === END BATAS MAKSIMAL ===
 
 // Read all RSS URLs from rss-feeds.txt
