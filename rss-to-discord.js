@@ -82,7 +82,7 @@ async function fetchAllArticles() {
     } catch (e) {
       console.error(`Failed: ${url}`);
     }
-    await new Promise(r => setTimeout(r, 2000)); // 2s delay
+    await new Promise(r => setTimeout(r, 3000)); // 3s delay between requests
   }
   return allArticles;
 }
