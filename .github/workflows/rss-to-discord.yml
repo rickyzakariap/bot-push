@@ -59,7 +59,7 @@ jobs:
             if ! git diff-index --quiet HEAD; then
               echo "Changes detected. Committing and pushing..."
               git add -A
-              git commit -m "Auto-post #${i} of ${COUNT}" || true # <-- TAMBAHKAN '|| true' DI SINI
+              git commit -m "update #${i}" || true
               git pull origin main --rebase
               git push
             else

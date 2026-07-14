@@ -100,9 +100,19 @@ async function main() {
     return;
   }
 
-  // Post to Discord
+  // Post to Discord with embed
+  const isReddit = article.feedUrl.includes('reddit.com');
+  const source = isReddit ? 'Reddit' : new URL(article.feedUrl).hostname.replace('www.', '');
+  const color = isReddit ? 16729344 : 3447003; // Reddit orange vs blue
+
   const payload = {
-    content: `**${article.title}**\n${article.url}\n(Source: ${article.feedUrl})`
+    embeds: [{
+      title: article.title,
+      url: article.url,
+      color: color,
+      footer: { text: source },
+      timestamp: new Date().toISOString()
+    }]
   };
   const res = await fetch(DISCORD_WEBHOOK_URL, {
     method: "POST",
@@ -120,7 +130,7 @@ async function main() {
   }
 
   // Always auto-push
-  exec('git add log.txt daily_count.txt && git commit -m "auto-update log.txt (your RSS here everyday!)" && git push', (err, stdout, stderr) => {
+  exec('git add log.txt daily_count.txt && git commit -m "update" && git push', (err, stdout, stderr) => {
     if (err) {
       console.error("Git error:", stderr);
     } else {
