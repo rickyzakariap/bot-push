@@ -4,7 +4,7 @@ https://www.antaranews.com/rss/tekno.xml
 https://www.antaranews.com/rss/ekonomi.xml
 
 # Reddit
-https://www.reddit.com/r/technology/.rss
-https://www.reddit.com/r/programming/.rss
-https://www.reddit.com/r/webdev/.rss
-https://www.reddit.com/r/indonesia/.rss
+https://old.reddit.com/r/technology/.rss
+https://old.reddit.com/r/programming/.rss
+https://old.reddit.com/r/webdev/.rss
+https://old.reddit.com/r/indonesia/.rss
