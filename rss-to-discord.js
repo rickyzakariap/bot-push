@@ -64,7 +64,10 @@ if (fs.existsSync("log.txt")) {
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 async function fetchAllArticles() {
-  const parser = new Parser();
+  const parser = new Parser({
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; RSSBot/1.0)' },
+    requestOptions: { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; RSSBot/1.0)' } }
+  });
   let allArticles = [];
   for (const url of rssFeeds) {
     try {
@@ -77,8 +80,9 @@ async function fetchAllArticles() {
       }));
       allArticles = allArticles.concat(articles);
     } catch (e) {
-      console.error(`Failed to fetch or parse feed: ${url}`);
+      console.error(`Failed: ${url}`);
     }
+    await new Promise(r => setTimeout(r, 2000)); // 2s delay
   }
   return allArticles;
 }
